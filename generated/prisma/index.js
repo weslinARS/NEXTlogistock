@@ -332,7 +332,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/wars/documents/logistock/generated/prisma",
+      "value": "/home/wars/Documentos/NEXTlogistock/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -348,7 +348,7 @@ const config = {
     "previewFeatures": [
       "postgresqlExtensions"
     ],
-    "sourceFilePath": "/home/wars/documents/logistock/prisma/schema.prisma",
+    "sourceFilePath": "/home/wars/Documentos/NEXTlogistock/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -362,7 +362,7 @@ const config = {
     "db"
   ],
   "activeProvider": "mysql",
-  "postinstall": false,
+  "postinstall": true,
   "inlineDatasources": {
     "db": {
       "url": {

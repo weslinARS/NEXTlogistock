@@ -1,7 +1,9 @@
 import { auth } from '@/auth';
+
+import { validateQueryParams } from '@lib/utils/getQueryParamManyBase';
 import bcrypt from 'bcryptjs';
 import { ValidationError } from 'yup';
-import { $Enums } from '../../../../generated/prisma';
+import { $Enums, Prisma } from '../../../../generated/prisma';
 import prisma from '../../../../lib/prisma';
 import { CreateUserDtoYup } from '../../../../lib/schemas/createUserSchema';
 import {
@@ -10,6 +12,72 @@ import {
 	ERROR_MESSAGES,
 	HttpStatus,
 } from '../../../../lib/utils/ApiResponse';
+import { userRepository } from '../_repositories/UserRepository';
+
+export async function GET(request: Request) {
+	try {
+		const { searchParams } = new URL(request.url);
+		const queryParams = await validateQueryParams(searchParams);
+		console.debug('Query params:', queryParams);
+		const includeArgs: Prisma.UserInclude | undefined =
+			queryParams.include.length > 0 || queryParams.count.length > 0
+				? {
+						ProductPriceHistory: queryParams.include.includes(
+							'ProductPriceHistory'
+						),
+						PurchaseOrder: queryParams.include.includes('PurchaseOrder'),
+						StockMovement: queryParams.include.includes('StockMovement'),
+
+						...(queryParams.count.length > 0
+							? {
+									_count: {
+										select: {
+											ProductPriceHistory: queryParams.count.includes(
+												'ProductPriceHistory'
+											),
+											PurchaseOrder:
+												queryParams.count.includes('PurchaseOrder'),
+											StockMovement:
+												queryParams.count.includes('StockMovement'),
+										},
+									},
+							  }
+							: {}),
+				  }
+				: undefined;
+
+		const result = await userRepository.findMany({
+			include: includeArgs,
+			select: undefined,
+			allRecords: queryParams.allRecords,
+			isSearchMode: queryParams.isSearch,
+			pageIndex: queryParams.pageIndex,
+			take: queryParams.pageSize,
+			includeDeleted: queryParams.withDeleted,
+			orderBy: {
+				lastName: 'asc',
+			},
+		});
+
+		console.debug('Result from userRepository:', result);
+		return apiSuccess({
+			data: result.items,
+			pagination: {
+				pageIndex: queryParams.pageIndex,
+				pageSize: queryParams.pageSize,
+				totalRecords: result.count,
+				totalPages: queryParams.pageSize > 0
+					? Math.floor(
+						result.count / queryParams.pageSize +
+							(result.count % queryParams.pageSize > 0 ? 1 : 0)
+					)
+					: 0,
+			},
+		});
+	} catch (error) {
+		console.debug('Error validating query params:', error);
+	}
+}
 
 export async function POST(request: Request) {
 	// get session

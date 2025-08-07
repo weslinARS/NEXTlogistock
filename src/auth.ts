@@ -3,26 +3,19 @@ import type { DefaultSession } from 'next-auth';
 import NextAuth from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import Credentials from 'next-auth/providers/credentials';
-import * as z from 'zod';
+import * as y from 'yup';
 import { $Enums } from '../generated/prisma';
 import prisma from '../lib/prisma';
-export const SignInSchema = z.object({
-	email: z
-		.email({
-			error: ({ input }) =>
-				input === undefined || input == ''
-					? 'El correo electrónico es requerido'
-					: 'El correo electrónico no es válido',
-		})
+
+export const SignInSchema = y.object({
+	email: y
+		.string()
+		.email('El correo no es valido')
+		.required('El correo es requerido')
 		.trim(),
-	password: z
-		.string({
-			error: 'La contraseña es requerida',
-		})
-		.min(1, {
-			error: 'La constraseña es requerida',
-		}),
+	password: y.string().required('La constraseña es requerida'),
 });
+
 declare module 'next-auth' {
 	interface Session {
 		user: {
@@ -84,10 +77,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 			authorize: async (credentials) => {
 				try {
 					console.debug('credentials are', credentials);
-					const { email, password } = await SignInSchema.parseAsync(
-						credentials
-					);
-
+					const { email, password } = await SignInSchema.validate(credentials);
 					const user = await prisma.user.findUnique({
 						where: {
 							email: credentials.email as string,
@@ -110,7 +100,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 					return null;
 				}
 			},
-			 
 		}),
 	],
 	session: {

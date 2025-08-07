@@ -30,7 +30,7 @@ export const ERROR_MESSAGES = {
 	QUERY_ERROR: 'Ocurrió un error al procesar su solicitud',
 };
 export interface IPagination {
-	page: number;
+	pageIndex: number;
 	pageSize: number;
 	totalRecords: number;
 	totalPages: number;

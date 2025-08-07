@@ -9,8 +9,8 @@ export default function ButtonSet() {
 		router.push('/admin/users/create');
 	}
 	return (
-		<div className="flex flex-col gap-4">
-			<Button onClick={goToCreateUser}>
+		<div className="flex flex-col gap-4 w-full sm:flex-row">
+			<Button onClick={goToCreateUser} className="w-full sm:w-auto">
 				<FaPlus />
 				Usuario
 			</Button>
