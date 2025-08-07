@@ -3,6 +3,7 @@ import NavBar from '@/components/Common/navigation/NavBar';
 import SideBar from '@/components/Common/SideBar';
 import { redirect } from 'next/navigation';
 import { ReactNode } from 'react';
+import AdminWrapper from './AdminWrapper';
 
 const VALID_ROLES = ['admin'];
 interface RoleLayoutProps {
@@ -21,7 +22,9 @@ export default async function RoleLayout({ children }: RoleLayoutProps) {
 		<div className="flex flex-col">
 			<NavBar />
 
-			<SideBar>{children}</SideBar>
+			<SideBar>
+				<AdminWrapper>{children}</AdminWrapper>
+			</SideBar>
 		</div>
 	);
 }
