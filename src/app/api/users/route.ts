@@ -18,7 +18,6 @@ export async function GET(request: Request) {
 	try {
 		const { searchParams } = new URL(request.url);
 		const queryParams = await validateQueryParams(searchParams);
-		console.debug('Query params:', queryParams);
 		const includeArgs: Prisma.UserInclude | undefined =
 			queryParams.include.length > 0 || queryParams.count.length > 0
 				? {
@@ -59,19 +58,19 @@ export async function GET(request: Request) {
 			},
 		});
 
-		console.debug('Result from userRepository:', result);
 		return apiSuccess({
 			data: result.items,
 			pagination: {
 				pageIndex: queryParams.pageIndex,
 				pageSize: queryParams.pageSize,
 				totalRecords: result.count,
-				totalPages: queryParams.pageSize > 0
-					? Math.floor(
-						result.count / queryParams.pageSize +
-							(result.count % queryParams.pageSize > 0 ? 1 : 0)
-					)
-					: 0,
+				totalPages:
+					queryParams.pageSize > 0
+						? Math.floor(
+								result.count / queryParams.pageSize +
+									(result.count % queryParams.pageSize > 0 ? 1 : 0)
+						  )
+						: 0,
 			},
 		});
 	} catch (error) {
