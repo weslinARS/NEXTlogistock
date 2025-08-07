@@ -19,6 +19,7 @@ const keyFactory = {
 			'findManyPaginated',
 			{ count, include, page, pageSize, withDeleted },
 		] as const,
+	invalidateManyPaginated: [defaultKey, 'invalidateManyPaginated'] as const,
 };
 
 const findManyUsersQueryOptions = ({
