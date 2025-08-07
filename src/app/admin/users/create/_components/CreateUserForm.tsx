@@ -1,12 +1,16 @@
 'use client';
 
+import { keyFactory } from '@/app/_queryOptions/adminUsersQueryOptions';
 import DynamicForm from '@/components/DynamicForm/DynamicForm';
 import {
 	FormConfig,
 	FormSchema,
 } from '@/components/DynamicForm/types/formFieldTypes';
+import axiosInstance from '@/utils/axiosInstance';
 import { CreateUserDto, CreateUserDtoYup } from '@lib/schemas/createUserSchema';
 import { IApiResponseBody } from '@lib/utils/ApiResponse';
+import { useQueryClient } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { customAlphabet } from 'nanoid';
 import { useRouter } from 'next/navigation';
 import { FaPlus } from 'react-icons/fa';
@@ -89,37 +93,54 @@ const formConfig: FormConfig<CreateUserDto> = {
 	formValidator: CreateUserDtoYup,
 };
 export default function CreateProductForm() {
+	const queryClient = useQueryClient();
 	const router = useRouter();
 	async function handleSubmit(values: CreateUserDto) {
-		const request = fetch('/api/users/', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				...values,
-			}),
+		const request = axiosInstance.post<IApiResponseBody<null>>('users/', {
+			...values,
 		});
-		toast.promise(
-			request.then(async (response) => {
-				const result = (await response.json()) as IApiResponseBody<null>;
 
-				if (!response.ok) {
+		toast.promise(
+			request.then((response) => {
+				const result = response.data;
+				if (!result.success) {
 					const messages = Array.isArray(result.error)
 						? result.error
 						: [result.error];
 					throw new Error(messages.join('. '));
 				}
-
 				return result;
 			}),
 			{
 				loading: 'Creando usuario...',
 				success: (result) => {
+					queryClient.invalidateQueries({
+						queryKey: [...keyFactory.invalidateManyPaginated],
+					});
 					router.refresh();
-					return `Usuario creado con éxito`;
+					return result.message || 'Usuario creado con éxito';
 				},
-				error: (err) => `${err.message || 'Error al crear el usuario'}`,
+				error: (err) => {
+					if (isAxiosError(err)) {
+						const error = err.response?.data as IApiResponseBody<null>;
+						return (
+							<>
+								{error.message.toUpperCase() || 'Error al crear el usuario'}
+								<br />
+								{Array.isArray(error.error)
+									? error.error.join('. ')
+									: error.error}
+							</>
+						);
+					}
+					return (
+						<>
+							{err.message.toUpperCase() || 'Error al crear el usuario'}
+							<br />
+							Intente nuevamente
+						</>
+					);
+				},
 				position: 'top-center',
 			}
 		);

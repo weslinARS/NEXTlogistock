@@ -1,5 +1,6 @@
 import { CustomQueryClientProvider } from '@/providers/QueryClientProvider';
 
+import { DaisyModalProvider } from '@/contexts/AlertContext';
 import type { Metadata } from 'next';
 import { SessionProvider } from 'next-auth/react';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -31,10 +32,12 @@ export default function RootLayout({
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
 				<CustomQueryClientProvider>
-					<SessionProvider>
-						{children}
-						<Toaster />
-					</SessionProvider>
+					<DaisyModalProvider>
+						<SessionProvider>
+							{children}
+							<Toaster richColors />
+						</SessionProvider>
+					</DaisyModalProvider>
 				</CustomQueryClientProvider>
 			</body>
 		</html>

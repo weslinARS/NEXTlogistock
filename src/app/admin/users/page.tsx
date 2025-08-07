@@ -10,7 +10,7 @@ import ButtonSet from './_components/ButtonSet';
 export default function UserAdminPage() {
 	const paginationControl = usePagination({
 		pageIndex: 0,
-		pageSize: 2,
+		pageSize: 20,
 		totalRecords: 0,
 		totalPages: 0,
 		withDeleted: false,

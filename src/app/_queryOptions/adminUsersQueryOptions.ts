@@ -6,7 +6,7 @@ import { FindManyArgsQueryOptions } from './types';
 
 const defaultKey = 'users-from-admin';
 
-const keyFactory = {
+export const keyFactory = {
 	findManyPaginated: ({
 		count,
 		include,
@@ -19,7 +19,7 @@ const keyFactory = {
 			'findManyPaginated',
 			{ count, include, page, pageSize, withDeleted },
 		] as const,
-	invalidateManyPaginated: [defaultKey, 'invalidateManyPaginated'] as const,
+	invalidateManyPaginated: [defaultKey, 'findManyPaginated'] as const,
 };
 
 const findManyUsersQueryOptions = ({
@@ -28,15 +28,8 @@ const findManyUsersQueryOptions = ({
 	page,
 	pageSize,
 	withDeleted,
-}: FindManyArgsQueryOptions) => {
-	console.debug('findManyUsersQueryOptions called with:', {
-		count,
-		include,
-		page,
-		pageSize,
-		withDeleted,
-	});
-	return queryOptions({
+}: FindManyArgsQueryOptions) =>
+	queryOptions({
 		queryKey: [
 			...keyFactory.findManyPaginated({
 				count,
@@ -57,7 +50,6 @@ const findManyUsersQueryOptions = ({
 				},
 			}),
 	});
-};
 
 const adminUsersQueryOptions = {
 	findManyUsersQueryOptions,
