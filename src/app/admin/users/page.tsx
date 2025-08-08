@@ -4,8 +4,11 @@ import adminUsersQueryOptions from '@/app/_queryOptions/adminUsersQueryOptions';
 import { usePagination } from '@/hooks/usePagination';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import UserTableIndex from '../products/_components/UserTableIndex';
+
+import { IApiResponseBody } from '@lib/utils/ApiResponse';
+import { User } from '@prisma-generated/prisma';
 import ButtonSet from './_components/ButtonSet';
+import UserTableIndex from './_components/UserTableIndex';
 
 export default function UserAdminPage() {
 	const paginationControl = usePagination({
@@ -15,18 +18,14 @@ export default function UserAdminPage() {
 		totalPages: 0,
 		withDeleted: false,
 	});
-	const {
-		data: { data: responseBody },
-		error,
-		isLoading,
-		isError,
-	} = useSuspenseQuery(
+	const { data, error, isLoading, isError } = useSuspenseQuery(
 		adminUsersQueryOptions.findManyUsersQueryOptions({
 			withDeleted: paginationControl.withDeleted,
 			page: paginationControl.pagination.pageIndex,
 			pageSize: paginationControl.pagination.pageSize,
 		})
 	);
+	const responseBody = data as unknown as IApiResponseBody<User[]>;
 	useEffect(() => {
 		if (responseBody.pagination) {
 			paginationControl.setTotalRecords(responseBody.pagination.totalRecords);
@@ -38,7 +37,7 @@ export default function UserAdminPage() {
 			<ButtonSet />
 			<div>
 				<UserTableIndex
-					data={responseBody.data || []}
+					data={responseBody?.data || []}
 					paginationControl={paginationControl}
 				/>
 			</div>

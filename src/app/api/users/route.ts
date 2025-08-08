@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 
+import { withAuth } from '@lib/middlewares/withAuth';
 import { validateQueryParams } from '@lib/utils/getQueryParamManyBase';
 import bcrypt from 'bcryptjs';
 import { ValidationError } from 'yup';
@@ -14,7 +15,7 @@ import {
 } from '../../../../lib/utils/ApiResponse';
 import { userRepository } from '../_repositories/UserRepository';
 
-export async function GET(request: Request) {
+async function secureGET(request: Request) {
 	try {
 		const { searchParams } = new URL(request.url);
 		const queryParams = await validateQueryParams(searchParams);
@@ -74,11 +75,15 @@ export async function GET(request: Request) {
 			},
 		});
 	} catch (error) {
-		console.debug('Error validating query params:', error);
+		return apiError({
+			errorCode: 'INTERNAL_SERVER_ERROR',
+			status: HttpStatus.INTERNAL_SERVER_ERROR,
+			error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+		});
 	}
 }
 
-export async function POST(request: Request) {
+async function securePOST(request: Request) {
 	// get session
 	const session = await auth();
 	if (session?.user.role !== $Enums.UserRole.admin) {
@@ -150,3 +155,6 @@ export async function POST(request: Request) {
 		});
 	}
 }
+
+export const POST = withAuth(securePOST, ['admin']);
+export const GET = withAuth(secureGET, ['admin', 'manager']);
